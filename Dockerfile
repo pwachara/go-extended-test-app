@@ -15,8 +15,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
-RUN adduser -D appuser
-USER appuser
+#RUN adduser -D appuser
+#USER appuser
 
 COPY --from=builder /app/app .
 
