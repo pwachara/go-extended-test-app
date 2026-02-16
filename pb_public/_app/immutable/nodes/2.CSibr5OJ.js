@@ -1,0 +1,1 @@
+import{a as e,f as a}from"../chunks/D1FjyND9.js";import"../chunks/2Tl7z7sr.js";import{n}from"../chunks/6hK_0PGQ.js";var p=a('<h1 class="text-blue-500 font-bold text-3xl">Welcome to Pocketbase</h1> <p>This application has been extended using Golang</p>',1);function i(o){var t=p();n(2),e(o,t)}export{i as component};
