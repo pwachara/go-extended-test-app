@@ -15,10 +15,14 @@ FROM alpine:latest
 
 WORKDIR /app
 
-#RUN adduser -D appuser
-#USER appuser
-
+# copy binary
 COPY --from=builder /app/app .
+
+# copy pb_public from repo (if exists)
+COPY --from=builder /app/pb_public ./pb_public
+
+# create persistent directory for PocketBase data
+RUN mkdir -p /app/pb_data
 
 EXPOSE 8090
 
