@@ -1,12 +1,13 @@
-# -------- Build stage --------
-FROM golang:1.25-alpine AS builder
+# -------- Build stage -------- 
+FROM golang:1.25-alpine AS builder  
 
-WORKDIR /app
+WORKDIR /app  
 
-COPY go.mod go.sum ./
-RUN go mod download
+COPY go.mod go.sum ./ 
 
-COPY . .
+RUN go mod download  
+
+COPY . .  
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app
 
@@ -21,8 +22,12 @@ COPY --from=builder /app/app .
 # copy pb_public from repo (if exists)
 COPY --from=builder /app/pb_public ./pb_public
 
-# create persistent directory for PocketBase data
+# Create the directory
 RUN mkdir -p /app/pb_data
+
+# ---> ADD THIS LINE <---
+# This tells Docker that this directory is intended to be a volume
+VOLUME /app/pb_data
 
 EXPOSE 8090
 
