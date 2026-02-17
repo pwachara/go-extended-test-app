@@ -26,4 +26,4 @@ RUN mkdir -p /app/pb_data
 
 EXPOSE 8090
 
-CMD ["./app", "serve", "--http=0.0.0.0:8090"]
+CMD ["./app", "serve", "--dir=/app/pb_data", "--http=0.0.0.0:8090"]
