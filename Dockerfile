@@ -1,32 +1,50 @@
-# -------- Build stage -------- 
-FROM golang:1.25-alpine AS builder  
+# -------- Stage 1: Build SvelteKit Frontend --------
+FROM node:20-alpine AS frontend
 
-WORKDIR /app  
+WORKDIR /ui
 
-COPY go.mod go.sum ./ 
+# Copy package files and install dependencies
+# Note: If your frontend is in a subfolder (e.g. /ui), adjust paths: COPY ui/package*.json ./
+COPY package*.json ./
+RUN npm ci
 
-RUN go mod download  
+# Copy the rest of the source code
+COPY . .
 
-COPY . .  
+# Build the app (outputs to /ui/build by default with adapter-static)
+RUN npm run build
 
+
+# -------- Stage 2: Build Go Backend --------
+FROM golang:1.25-alpine AS backend
+
+WORKDIR /app
+
+# Copy Go module files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the Go source code
+COPY . .
+
+# Build the binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app
 
-# -------- Runtime stage --------
+
+# -------- Stage 3: Final Runtime Image --------
 FROM alpine:latest
 
 WORKDIR /app
 
-# copy binary
-COPY --from=builder /app/app .
+# 1. Copy the Go binary from the backend stage
+COPY --from=backend /app/app .
 
-# copy pb_public from repo (if exists)
-COPY --from=builder /app/pb_public ./pb_public
+# 2. Copy the built SvelteKit files into pb_public
+# We take the "build" folder from the 'frontend' stage and place it at './pb_public'
+COPY --from=frontend /ui/build ./pb_public
 
-# Create the directory
+# Create persistence directory
 RUN mkdir -p /app/pb_data
-
-# ---> ADD THIS LINE <---
-# This tells Docker that this directory is intended to be a volume
 VOLUME /app/pb_data
 
 EXPOSE 8090
